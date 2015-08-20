@@ -1,0 +1,13 @@
+arduino-serial/mongoose/examples/chat.c
+arduino-serial/mongoose/examples/hello.c
+arduino-serial/mongoose/test/embed.c
+arduino-serial/mongoose/test/unit_test.c
+arduino-serial/mongoose/main.c
+arduino-serial/mongoose/mongoose.c
+arduino-serial/mongoose/mongoose.h
+arduino-serial/arduino-serial-lib.c
+arduino-serial/arduino-serial-lib.h
+arduino-serial/arduino-serial-server.c
+arduino-serial/arduino-serial.c
+maestroTest.c
+MB.c
