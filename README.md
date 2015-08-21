@@ -5,15 +5,16 @@ Pour utiliser le driver lancer l'application linux MB_test (ou la version stdc M
 Pour compiler une application avec le driver inclure l'entête mbdriver.h dans votre fichier principal et compiler mbdriver.cpp, arduino-serial.cpp avec votre éxécutable.
 
 L'utilisation de la classe est simple :
+
 --Création
+
 MBDriver MBD;
+
 --Connection aux 2 modules série
+
 MBD.opendevices("/dev/ttyACM0","/dev/ttyACM1");
---Lecture/Écriture
-MBD.maestroGetPosition(MOTORCOIN);
-MBD.maestroSetTarget(MOTORCOIN, 100);
-MBD.readArduino();
-MBD.writeArduino();
+
+Les commandes pour lancer les moteurs/shocks sont décrites dans le fichier exemple MB_sample.cpp .
 
 En quittant le destructeur se charge de couper les connection séries correctement.
 
