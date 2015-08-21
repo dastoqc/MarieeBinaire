@@ -22,7 +22,6 @@
 /*#include <libxml/xmlreader.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>*/
-#include "arduino-serial/arduino-serial-lib.h"
 
 #include "mbdriver.h"
 
@@ -165,17 +164,11 @@ int main(int argc, char **argv)
             return 0;
         case 'a':
             printf("LCOIN-FW!! ");
-                    if(!DEBUG) int p = MBD.maestroGetPosition(MOTORCOIN);
-            printf("Position %i\n",p);
-                    if(!DEBUG) MBD.maestroSetTarget(MOTORCOIN, p+10);
+                    if(!DEBUG) MBD.mvtx(10,2);
             break;
         case 'z':
             printf("LCOIN-RW!! ");
-                    if(!DEBUG) int p = MBD.maestroGetPosition(MOTORCOIN);
-            printf("Position %i\n",p);
-            if(p-10<4790)
-                p=p+10;
-                    if(!DEBUG) MBD.maestroSetTarget(MOTORCOIN, p-10);
+                    if(!DEBUG) MBD.mvtx(-10,2);
             break;
             case 'p':
             printf("SHOCK, entrer la zone (a,b,c) et la puissance (0-100) :");
@@ -183,47 +176,27 @@ int main(int argc, char **argv)
                     printf ("%c à %d\% \n", zone, pwr);
             else
                 printf("Mauvaise entrée");
-                    sprintf(buf, "%c%03d",zone,pwr);
-                    if(!DEBUG){
-                int rc = MBD.writeArduino(buf);
-                usleep(20*1000);
-                MBD.readArduino();
-                rc = MBD.writeArduino("g000");
-                usleep(500*1000);
-                MBD.readArduino();
+            if(!DEBUG){
+                MBD.setLangue(zone,pwr);
+                MBD.shock(0);
             }
-                    break;
+            break;
         case 'e':
             printf("ELECTROLARYNX, entrer la puissance (0-100) :");
             if (scanf("%d", &pwr) == 1)
                     printf ("%d\% \n", pwr);
             else
                 printf("Mauvaise entrée");
-                    sprintf(buf, "l%03d",pwr);
-                    if(!DEBUG){
-//			  	serialport_flush(fdArduino);
-                int rc = MBD.writeArduino(buf);
-                usleep(20*1000);
-                MBD.readArduino();
-            }
-                    break;
+                if(!DEBUG) MBD.setLarynx(pwr);
+            break;
         case 'm':
-            printf("MENTON, entrer la vitesse (0-100) :");
+            printf("MENTON, entrer la vitesse (-100->100) :");
             if (scanf("%d", &pwr) == 1)
                     printf ("%d\% \n", pwr);
             else
                 printf("Mauvaise entrée");
-                    if(pwr>0)
-                sprintf(buf, "m%03d",pwr);
-            else
-                sprintf(buf, "n%03d",-pwr);
-                    if(!DEBUG){
-//			  	serialport_flush(fdArduino);
-                int rc = MBD.writeArduino(buf);
-                usleep(100*1000);
-                MBD.readArduino();
-            }
-                    break;
+            if(!DEBUG) MBD.chinGoTo(pwr);
+            break;
 /*        case 'f':
             printf("Phonème enregistrés (test.xml) :");
             if (scanf("%d", &zone) == 1){
