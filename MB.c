@@ -30,7 +30,7 @@
 #define MOTORCOIN 4
 
 // Pour tester sans les board branchés en SUB mettre cette valeur à 1.
-#define DEBUG 1
+#define DEBUG 0
 
 int fdMaestro = -1;
 int fdArduino = -1;
@@ -260,7 +260,7 @@ int main(int argc, char **argv)
   if(!DEBUG) maestroSetTarget(fdMaestro, MOTORCOIN, target);
   //maestroSetTarget(fdMaestro, 5, target);  //channel libre.
 
-  printf("Les flèches pour bouger les lèvres, 'a'/'z' pour les comissures des lèvres, 'p' pour shocker la langue et 'q' pour quitter. \n");
+  printf("Les flèches pour bouger les lèvres, 'a'/'z' pour les comissures des lèvres, 'p' pour shocker la langue, 'l' pour le larynx, m' pour le menton et 'q' pour quitter. \n");
   char val=' ', zone=' ';
   int pwr=0;
   while(1){

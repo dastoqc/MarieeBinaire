@@ -11,3 +11,7 @@ arduino-serial/arduino-serial-server.c
 arduino-serial/arduino-serial.c
 maestroTest.c
 MB.c
+mbdriver.h
+mbdriver.cpp
+MB_test.cpp
+arduino-serial/arduino-serial-lib.cpp
