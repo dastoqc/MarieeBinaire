@@ -124,7 +124,14 @@ char getch(void)
 int main(int argc, char **argv)
 {
   //LIBXML_TEST_VERSION
-  MBDriver MBD("/dev/ttyACM0","/dev/ttyACM1"); //Device Arduino puis Maestro (première des 2)
+  MBDriver MBD;//("/dev/ttyACM0","/dev/ttyACM1"); //Device Arduino puis Maestro (première des 2)
+  if(!DEBUG){
+      int rc = MBD.opendevices("/dev/ttyACM0","/dev/ttyACM1");
+      if(rc!=0){
+          printf("Failed to start devices\n");
+          return -1;
+      }
+  }
 
   printf("Les flèches pour bouger les lèvres, 'a'/'z' pour les comissures des lèvres, 'p' pour shocker la langue et 'q' pour quitter. \n");
   char val=' ', zone=' ', *buf;

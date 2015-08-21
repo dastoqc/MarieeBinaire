@@ -8,7 +8,7 @@
 #define MOTORCOIN 4
 
 // Pour tester sans les board branchés en SUB mettre cette valeur à 1.
-#define DEBUG 1
+#define DEBUG 0
 
 struct SERVO {
     int pos_max;
@@ -21,8 +21,7 @@ class MBDriver
 public:
     MBDriver();
     ~MBDriver();
-    MBDriver(char* arduino, char* maestro);
-    int opendevices();
+    int opendevices(char* arduino, char* maestro);
     int readconfig();
     int saveconfig();
     int maestroGetPosition(unsigned char channel);

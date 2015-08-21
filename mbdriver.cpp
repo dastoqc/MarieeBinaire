@@ -21,21 +21,6 @@ MBDriver::MBDriver()
     timeout = 5000;
 
     readconfig();
-    if(!DEBUG) opendevices();
-}
-
-MBDriver::MBDriver(char* arduino, char* maestro)
-{
-    fdMaestro = -1;
-    fdArduino = -1;
-    Dmaestro = maestro;  // Maestro Pololu Controller
-    Darduino = arduino;  // Arduino
-    quiet=0;
-    eolchar = '\n';
-    timeout = 5000;
-
-    readconfig();
-    if(!DEBUG) opendevices();
 }
 
 int MBDriver::readconfig()
@@ -64,9 +49,13 @@ int MBDriver::saveconfig()
     return 0;
 }
 
-int MBDriver::opendevices()
+int MBDriver::opendevices(char* arduino, char* maestro)
 {
     int p[6];
+
+    Dmaestro = maestro;  // Maestro Pololu Controller
+    Darduino = arduino;  // Arduino
+
     fdMaestro = open(Dmaestro, O_RDWR | O_NOCTTY);
     if (fdMaestro <= 0)
     {
