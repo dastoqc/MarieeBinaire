@@ -11,8 +11,11 @@ maestroTest: maestroTest.o
 MB: MB.o arduino-serial/arduino-serial-lib.o
 	$(CC) $(CFLAGS) -o MB MB.o arduino-serial/arduino-serial-lib.o `xml2-config --libs` -I. -I/usr/include/libxml2
 
-MB_test: MB_test.o mbdriver.o arduino-serial-lib.o
-	g++ $(CFLAGS) -o MB_test MB_test.o mbdriver.o arduino-serial-lib.o `xml2-config --libs` -I. -I/usr/include/libxml2
+libmbdriver.a: mbdriver.o arduino-serial-lib.o
+	ar -rv $@ $^
+
+MB_test: MB_test.o libmbdriver.a
+	g++ $(CFLAGS) -o MB_test MB_test.o `xml2-config --libs` -L. -lmbdriver -I. -I/usr/include/libxml2
 
 .c.o:
 	gcc -c $*.c -o $*.o -I/usr/include/libxml2
