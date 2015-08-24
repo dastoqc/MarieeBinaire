@@ -1,0 +1,42 @@
+// Fichier de configuration éditable manuellement pour le driver Mariée Binaire. DS-241082015
+// 0 servo lèvres haut droite
+0.start=5985
+0.min=3970
+0.max=8000
+0.nbpos=3
+// 0 servo lèvres haut gauche
+1.start=5985
+1.min=3970
+1.max=8000
+1.nbpos=3
+// 0 servo lèvres bas droite
+2.start=5985
+2.min=3970
+2.max=8000
+2.nbpos=3
+// 0 servo lèvres bas gauche
+3.start=5985
+3.min=3970
+3.max=8000
+3.nbpos=3
+// servo lèvres coins
+4.start=6045
+4.min=4090
+4.max=8000
+4.nbpos=5
+// stepper menton
+5.maxpos=220
+5.nb_pos=3
+// électrolarynx
+6.max=120
+6.nbpos=3
+// langue 'a' -> bout
+7.max=120
+7.nbpos=3
+// langue 'b' -> fond
+8.max=120
+8.nbpos=3
+//langue 'c' -> centre
+9.max=120
+9.nbpos=3
+

@@ -8,21 +8,18 @@
 #define MOTORCOIN 4
 
 // Pour tester sans les board branchés en SUB mettre cette valeur à 1.
-#define DEBUG 1
+#define DEBUG 0
 
 struct SERVO {
     int pos_max;
     int pos_min;
-    int offset;
+    int start;
+    int nb_pos;
 };
 
 struct EDEV {
     int max;
-    int min;
-};
-
-struct CHIN {
-    int max;
+    int nb_pos;
 };
 
 template <typename T> int sgn(T val) {
@@ -37,9 +34,10 @@ public:
     int opendevices(char* arduino, char* maestro);
     int readconfig();
     int saveconfig();
-    void mvtx(int pas, int haut);
+    void mvtx(int rec_pos, int section);
+    void servoIncr(int num, int pas);
     void servoGoTo(int num, int pos);
-    void chinGoTo(int pwr);
+    void chinGoTo(int rec_pos, int speed = 50);
     void setLarynx(int pwr);
     void setLangue(char zone, int pwr);
     void shock(int t);
@@ -49,7 +47,7 @@ private:
     SERVO servo[5];
     EDEV elarynx;
     EDEV elangue[3];
-    CHIN chinStepper;
+    EDEV chinStepper;
     int fdMaestro;
     int fdArduino;
     const char * Dmaestro;  // Maestro Pololu Controller
@@ -59,6 +57,7 @@ private:
     int timeout;
     int rc,n;
 
+    int defaultconfig();
     int readArduino();
     int writeArduino(char* buf);
     int maestroGetPosition(unsigned char channel);

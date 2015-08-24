@@ -14,25 +14,28 @@ int main(int argc, char **argv)
             return -1;
         }
         // Pour bouguer les lèvres
-        int pos = 4500;
-        MBD.servoGoTo(MOTORBD,pos); //MOTORBD,MOTORBG,MOTORHD,MOTORHG,MOTORCOIN
+        int pos = 2; // numéro de la position également distribuée entre min et max selon le nbr maximum de position possible configuré dans config.txt
+        int section = 1; // section des lèvres: 0-haut, 1-bas, 2-coins
+        MBD.mvtx(pos,section);
 
         // Pour lancer l'électrolarynx
         int pwrL = 100;
         MBD.setLarynx(pwrL);
 
-        // Pour bouger le menton (négatif déroule) .. plus de tests à faire pour les limites
-        int pwrC = 50;
-        MBD.chinGoTo(pwrC);
+        // Pour bouger le menton (négatif déroule)
+        int posC = 220;
+        int speed = 50;
+        MBD.chinGoTo(posC,speed);
 
         // Pour lancer un shock
         char zone = 'a'; int pwr = 100;
         MBD.setLangue(zone,pwr); //a-pointe, b-centre, c-fond
-        MBD.shock(0);
+        int t = 20; // temps de shock en millis
+        MBD.shock(20);
 
         // Pour tout faire d'une commande
-        int posarray[5]={4000,4000,5000,3000,7000};
+        int posarray[5]={4000,4000,5000,3000,7000}; //positions de chaque servo des lèvres
         int pwrLangue[3]={100,0,100};
-        MBD.all(posarray,pwrL,pwrC,pwrLangue);
+        MBD.all(posarray,pwrL,posC,pwrLangue);
     }
 }

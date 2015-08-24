@@ -12,6 +12,7 @@
 #include <vector>
 #include <string>
 #include <termios.h>
+#include <math.h>
 
 using namespace std;
 
@@ -25,45 +26,64 @@ MBDriver::MBDriver()
     eolchar = '\n';
     timeout = 5000;
 
+    defaultconfig();
     readconfig();
+}
+
+int MBDriver::defaultconfig()
+{
+    for(int i=0;i<5;i++) {
+        servo[i].pos_min=4000;
+        servo[i].pos_max=8000;
+        servo[i].start=6000;
+        servo[i].nb_pos=3;
+    }
+    for(int i=0;i<3;i++) {
+        elangue[i].max=120;
+        elangue[i].nb_pos=3;
+    }
+    elarynx.max=255;
+    elarynx.nb_pos=3;
+    chinStepper.max=300;
+    chinStepper.nb_pos=3;
 }
 
 int MBDriver::readconfig()
 {
     ifstream file("config.txt");
+    const std::string whitespace(" \t\n\r");
     if (file)
-    {
-        /*
-         * Get the size of the file
-         */
+    {/*
+        //Get the size of the file
         file.seekg(0,ios::end);
         streampos          length = file.tellg();
         file.seekg(0,ios::beg);
-
-        /*
-         * Use a vector as the buffer.
-         * It is exception safe and will be tidied up correctly.
-         * This constructor creates a buffer of the correct length.
-         *
-         * Then read the whole file into the buffer.
-         */
+        // Use a vector as the buffer.
+        // It is exception safe and will be tidied up correctly.
+        // This constructor creates a buffer of the correct length.
+        // Then read the whole file into the buffer.
         vector<char>       buffer(length);
         file.read(&buffer[0],length);
-
-        /*
-         * Create your string stream.
-         * Get the stringbuffer from the stream and set the vector as it source.
-         */
+        // Create your string stream.
+        // Get the stringbuffer from the stream and set the vector as it source.
         stringstream       localStream;
         localStream.rdbuf()->pubsetbuf(&buffer[0],length);
-
-        /*
-         * Note the buffer is NOT copied, if it goes out of scope
-         * the stream will be reading from released memory.
-         */
+        // Note the buffer is NOT copied, if it goes out of scope
+        // the stream will be reading from released memory.
+        */
         string line;
-        while( getline(localStream, line) )
+        while( getline(file, line) )
         {
+          size_t first_nonws = line.find_first_not_of( whitespace );
+          // skip empty lines
+          if( first_nonws == string::npos ) {
+            continue;
+          }
+            // skip c++ comments
+          if( line.find("//") == first_nonws ) {
+              if(DEBUG) cout << "coments!!" << endl;
+            continue;
+          }
           istringstream is_line(line);
           string nums;
           if( getline(is_line, nums, '.') )
@@ -72,28 +92,34 @@ int MBDriver::readconfig()
             string key;
             if( getline(is_line, key, '=') )
             {
-                string value;
-                if( getline(is_line, value) ){
-                    //cout << num << " " << key << " " << value << endl;
+                string values;
+                if( getline(is_line, values) ){
+                    int value = atoi(values.c_str());
+                    if(DEBUG) cout << num << " " << key << " " << value << endl;
                     if(num==5)
-                        chinStepper.max=atoi(value.c_str());
+                        if(key=="maxpos")
+                            chinStepper.max = value;
+                        if(key=="nbpos")
+                            chinStepper.nb_pos = value;
                     else if(num==6){
-                        if(key=="min")
-                          if ( ! (istringstream(value) >> elarynx.min) ) elarynx.min = 0;
                         if(key=="max")
-                          if ( ! (istringstream(value) >> elarynx.max) ) elarynx.max = 800;
+                            elarynx.max = value;
+                        if(key=="nbpos")
+                            elarynx.nb_pos = value;
                     }else if(num>6){
-                        if(key=="min")
-                          if ( ! (istringstream(value) >> elangue[num-7].min) ) elangue[num-7].min = 0;
                         if(key=="max")
-                          if ( ! (istringstream(value) >> elangue[num-7].max) ) elangue[num-7].max = 800;
+                            elangue[num].max = value;
+                        if(key=="nbpos")
+                            elangue[num].nb_pos = value;
                     }else{
-                        if(key=="off")
-                          if ( ! (istringstream(value) >> servo[num].offset) ) servo[num].offset = 0;
+                        if(key=="start")
+                          servo[num].start = value;
                         if(key=="min")
-                          if ( ! (istringstream(value) >> servo[num].pos_min) ) servo[num].pos_min = 4000;
+                            servo[num].pos_min = value;
                         if(key=="max")
-                          if ( ! (istringstream(value) >> servo[num].pos_max) ) servo[num].pos_max = 8000;
+                            servo[num].pos_max = value;
+                        if(key=="nbpos")
+                            servo[num].nb_pos = value;
                     }
                   }
             }
@@ -102,16 +128,18 @@ int MBDriver::readconfig()
     }
 
     for(int i=0;i<5;i++)
-        cout << "Moteur " << i << " " << "Offset:" << servo[i].offset << ", Max:" << servo[i].pos_max << ", Min:" << servo[i].pos_min << endl;
-    cout << "ÉlectroLarynx " << "Max:" << elarynx.max << ", Min:" << elarynx.min << endl;
+        cout << "Moteur " << i << " " << "Start:" << servo[i].start << ", Max:" << servo[i].pos_max << ", Min:" << servo[i].pos_min << ", Nbre positions:" << servo[i].nb_pos << endl;
+    cout << "ÉlectroLarynx " << "Max:" << elarynx.max << endl;
+    cout << "Stepper Menton " << "Max:" << chinStepper.max << ", Nbre positions:" << chinStepper.nb_pos << endl;
     for(int i=0;i<3;i++)
-        cout << "ÉlectroLangue " << i << " Max:" << elangue[i].max << ", Min:" << elangue[i].min << endl;
+        cout << "ÉlectroLangue " << i << " Max:" << elangue[i].max << endl;
 
     return 0;
 }
 
 int MBDriver::saveconfig()
 {
+    // TODO
     return 0;
 }
 
@@ -153,15 +181,11 @@ int MBDriver::opendevices(char* arduino, char* maestro)
     cout << "Les positions des servos sont actuellement : " << p[0] << ", " << p[1] << ", " << p[2] << ", " << p[3] << ", " << p[4] << ", " << p[5] << ", " << endl;
 
 
-    int target = 3970+(8000-3970)/2;
+    //int target = 3970+(8000-3970)/2;
 
-    cout << "Tous les servos sont remis à " <<  target << " (" << target/4 << " us)." << endl;
-    maestroSetTarget(MOTORHD, target);
-    maestroSetTarget(MOTORHG, target);
-    maestroSetTarget(MOTORBD, target);
-    maestroSetTarget(MOTORBG, target);
-    maestroSetTarget(MOTORCOIN, target);
-    //maestroSetTarget(fdMaestro, 5, target);  //channel libre.
+    cout << "Tous les servos sont remis à leur position de démarrage." << endl;
+    for(int i=0;i<5;i++)
+        maestroSetTarget(i, servo[i].start);
 
     return 0;
 }
@@ -223,29 +247,50 @@ int MBDriver::writeArduino(char* buf)
 }
 
 // Movement de chaque paire de servo en simultané pour une translation des lèvres perpendiculaire au visage
-// Max 8000, min 3968
-void MBDriver::mvtx(int pas, int sec)
+// Selon le nbr de position permises dans la config file. !!1 = min!!
+void MBDriver::mvtx(int rec_pos, int sec)
 {
-  int position = 0;
+  rec_pos--;
   if(sec==1){
-    position = maestroGetPosition(MOTORHD);
-    //cout << "Position S" << (int)MOTORHD << ": " << position << endl;
-    servoGoTo(MOTORHD, position+pas);
-    position = maestroGetPosition(MOTORHG);
-    //cout << "Position S" << (int)MOTORHG << ": " << position << endl;
-    servoGoTo(MOTORHG, position-pas);
+    int range = servo[MOTORHD].pos_max - servo[MOTORHD].pos_min;
+    if(rec_pos>=servo[MOTORHD].nb_pos)
+        rec_pos=servo[MOTORHD].nb_pos-1;
+    int position = floor((float)rec_pos/(float)(servo[MOTORHD].nb_pos-1)*(float)range)+servo[MOTORHD].pos_min;
+    servoGoTo(MOTORHD, position);
+    range = servo[MOTORHG].pos_max - servo[MOTORHG].pos_min;
+    if(rec_pos>=servo[MOTORHG].nb_pos)
+        rec_pos=servo[MOTORHG].nb_pos-1;
+    position = floor(((float)servo[MOTORHG].nb_pos-(float)rec_pos-1)/(float)(servo[MOTORHG].nb_pos-1)*(float)range)+servo[MOTORHG].pos_min;
+    servoGoTo(MOTORHG, position);
   }else if(sec==0){
-    position = maestroGetPosition(MOTORBD);
-    //cout << "Position S" << (int)MOTORBD << ": " << position << endl;
-    servoGoTo(MOTORBD, position+pas);
-    position = maestroGetPosition(MOTORBG);
-    //cout << "Position S" << (int)MOTORBG << ": " << position << endl;
-    servoGoTo(MOTORBG, position-pas);
+      int range = servo[MOTORBD].pos_max - servo[MOTORBD].pos_min;
+      if(rec_pos>=servo[MOTORBD].nb_pos)
+          rec_pos=servo[MOTORBD].nb_pos-1;
+      int position = floor((float)rec_pos/(float)(servo[MOTORBD].nb_pos-1)*(float)range)+servo[MOTORBD].pos_min;
+      servoGoTo(MOTORBD, position);
+      range = servo[MOTORBG].pos_max - servo[MOTORBG].pos_min;
+      if(rec_pos>=servo[MOTORBG].nb_pos)
+          rec_pos=servo[MOTORBG].nb_pos-1;
+      position = floor(((float)servo[MOTORBG].nb_pos-(float)rec_pos-1)/(float)(servo[MOTORBG].nb_pos-1)*(float)range)+servo[MOTORBG].pos_min;
+      servoGoTo(MOTORBG, position);
   }else if(sec==2){
-      position = maestroGetPosition(MOTORCOIN);
-      //cout << "Position S" << (int)MOTORCOIN << ": " << position << endl;
-      servoGoTo(MOTORCOIN, position+pas);
+      int range = servo[MOTORCOIN].pos_max - servo[MOTORCOIN].pos_min;
+      if(rec_pos>=servo[MOTORCOIN].nb_pos)
+          rec_pos=servo[MOTORCOIN].nb_pos-1;
+      int position = floor((float)rec_pos/(float)(servo[MOTORCOIN].nb_pos-1)*(float)range)+servo[MOTORCOIN].pos_min;
+      servoGoTo(MOTORCOIN, position);
     }
+}
+
+void MBDriver::servoIncr(int num, int pas)
+{
+    int pos = maestroGetPosition(num)+pas;
+    if(pos>servo[num].pos_max)
+        pos=servo[num].pos_max;
+    else if (pos<servo[num].pos_min)
+            pos=servo[num].pos_min;
+    maestroSetTarget(num, pos);
+    cout << "Position S" << num << ": " << pos << endl;
 }
 
 void MBDriver::servoGoTo(int num, int pos)
@@ -257,19 +302,26 @@ void MBDriver::servoGoTo(int num, int pos)
     maestroSetTarget(num, pos);
 }
 
-void MBDriver::chinGoTo(int pwr)
+void MBDriver::chinGoTo(int rec_pos, int speed)
 {
     char* buf;
-    if(abs(pwr)>chinStepper.max)
-        pwr=sgn(pwr)*chinStepper.max;
+    rec_pos--;
+    int pos = floor((float)rec_pos*(float)chinStepper.max/(float)(chinStepper.nb_pos-1));
+    if(abs(pos)>chinStepper.max)
+        pos=sgn(pos)*chinStepper.max;
 
-    if(pwr>0)
-        sprintf(buf, "m%03d",pwr);
+    sprintf(buf, "v%03d", speed);
+    int rc = writeArduino(buf);
+    usleep(100*1000);
+    readArduino();
+
+    if(pos>0)
+        sprintf(buf, "m%03d",pos);
     else
-        sprintf(buf, "n%03d",-pwr);
+        sprintf(buf, "n%03d",-pos);
 
     //serialport_flush(fdArduino);
-    int rc = writeArduino(buf);
+    rc = writeArduino(buf);
     usleep(100*1000);
     readArduino();
 }
@@ -279,8 +331,6 @@ void MBDriver::setLarynx(int pwr)
     char* buf;
     if(pwr>elarynx.max)
         pwr=elarynx.max;
-    else if (pwr<elarynx.min)
-        pwr=elarynx.min;
 
     //serialport_flush(fdArduino);
     sprintf(buf, "l%03d",pwr);
@@ -301,7 +351,9 @@ void MBDriver::setLangue(char zone, int pwr)
 
 void MBDriver::shock(int t)
 {
-    int rc = writeArduino("g000");
+    char* buf;
+    sprintf(buf, "%g%03d",t);
+    int rc = writeArduino(buf);
     usleep((500+t)*1000);
     readArduino();
 }
