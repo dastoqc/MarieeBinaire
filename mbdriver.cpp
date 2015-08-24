@@ -46,6 +46,7 @@ int MBDriver::defaultconfig()
     elarynx.nb_pos=3;
     chinStepper.max=300;
     chinStepper.nb_pos=3;
+    chinStepper.current=0;
 }
 
 int MBDriver::readconfig()
@@ -315,6 +316,7 @@ void MBDriver::chinGoTo(int rec_pos, int speed)
     usleep(100*1000);
     readArduino();
 
+    pos=pos-chinStepper.current;
     if(pos>0)
         sprintf(buf, "m%03d",pos);
     else
@@ -324,6 +326,7 @@ void MBDriver::chinGoTo(int rec_pos, int speed)
     rc = writeArduino(buf);
     usleep(100*1000);
     readArduino();
+    chinStepper.current+=pos;
 }
 
 void MBDriver::setLarynx(int pwr)

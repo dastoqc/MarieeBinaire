@@ -22,6 +22,12 @@ struct EDEV {
     int nb_pos;
 };
 
+struct CHIN {
+    int max;
+    int nb_pos;
+    int current;
+};
+
 template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
@@ -47,7 +53,7 @@ private:
     SERVO servo[5];
     EDEV elarynx;
     EDEV elangue[3];
-    EDEV chinStepper;
+    CHIN chinStepper;
     int fdMaestro;
     int fdArduino;
     const char * Dmaestro;  // Maestro Pololu Controller
