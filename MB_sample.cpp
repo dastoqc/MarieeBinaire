@@ -23,7 +23,7 @@ int main(int argc, char **argv)
         MBD.setLarynx(pwrL);
 
         // Pour bouger le menton (négatif déroule)
-        int posC = 220;
+        int posC = 2; // numéro de la position également distribuée entre min et max selon le nbr maximum de position possible configuré dans config.txt
         int speed = 50;
         MBD.chinGoTo(posC,speed);
 
