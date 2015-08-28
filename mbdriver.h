@@ -40,10 +40,10 @@ public:
     int opendevices(char* arduino, char* maestro);
     int readconfig();
     int saveconfig();
-    void mvtx(int rec_pos, int section);
+    void mvtx(float rec_pos, int section);
     void servoIncr(int num, int pas);
     void servoGoTo(int num, int pos);
-    void chinGoTo(int rec_pos, int speed = 50);
+    void chinGoTo(float rec_pos, int speed = 50);
     void setLarynx(int pwr);
     void setLangue(char zone, int pwr);
     void shock(int t);

@@ -18,6 +18,8 @@ using namespace std;
 
 MBDriver::MBDriver()
 {
+    cout << "MBDriver: " << __DATE__ << " " __TIME__ << "\n";
+
     fdMaestro = -1;
     fdArduino = -1;
     Dmaestro = "/dev/ttyACM1";  // Maestro Pololu Controller
@@ -249,7 +251,7 @@ int MBDriver::writeArduino(char* buf)
 
 // Movement de chaque paire de servo en simultané pour une translation des lèvres perpendiculaire au visage
 // Selon le nbr de position permises dans la config file. !!1 = min!!
-void MBDriver::mvtx(int rec_pos, int sec)
+void MBDriver::mvtx(float rec_pos, int sec)
 {
   rec_pos--;
   if(sec==1){
@@ -268,7 +270,7 @@ void MBDriver::mvtx(int rec_pos, int sec)
       if(rec_pos>=servo[MOTORBD].nb_pos)
           rec_pos=servo[MOTORBD].nb_pos-1;
       int position = floor((float)rec_pos/(float)(servo[MOTORBD].nb_pos-1)*(float)range)+servo[MOTORBD].pos_min;
-      servoGoTo(MOTORBD, position);
+     servoGoTo(MOTORBD, position);
       range = servo[MOTORBG].pos_max - servo[MOTORBG].pos_min;
       if(rec_pos>=servo[MOTORBG].nb_pos)
           rec_pos=servo[MOTORBG].nb_pos-1;
@@ -303,7 +305,7 @@ void MBDriver::servoGoTo(int num, int pos)
     maestroSetTarget(num, pos);
 }
 
-void MBDriver::chinGoTo(int rec_pos, int speed)
+void MBDriver::chinGoTo(float rec_pos, int speed)
 {
     char* buf;
     rec_pos--;
