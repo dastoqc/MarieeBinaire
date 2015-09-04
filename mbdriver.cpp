@@ -1,6 +1,6 @@
 #include "mbdriver.h"
 
-#include "arduino-serial/arduino-serial-lib.h"
+#include "arduino-serial-lib.h"
 
 #include <fcntl.h>
 #include <stdio.h>
