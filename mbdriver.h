@@ -8,7 +8,7 @@
 #define MOTORCOIN 4
 
 // Pour tester sans les board branchés en SUB mettre cette valeur à 1.
-#define DEBUG 0
+#define DEBUG 1
 
 struct SERVO {
     int pos_max;

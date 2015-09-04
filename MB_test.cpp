@@ -18,6 +18,9 @@
 #include <sys/stat.h>
 #include <sys/select.h>
 #include <termios.h>
+#include <sys/ioctl.h>
+#include <linux/kd.h>
+
 
 /*#include <libxml/xmlreader.h>
 #include <libxml/parser.h>
@@ -58,6 +61,11 @@ char getch(void)
   return getch_(0);
 }
 
+void print_caps_lock_state(int state){
+    printf("Caps Lock state: %s (%d)\n",state & K_CAPSLOCK == K_CAPSLOCK ? "on" : "off", state);
+}
+
+
 int main(int argc, char **argv)
 {
   //LIBXML_TEST_VERSION
@@ -70,9 +78,16 @@ int main(int argc, char **argv)
       }
   }
 
-  printf("Les flèches pour bouger les lèvres, 'a'/'z' pour les comissures des lèvres, 'p' pour shocker la langue, 'l' pour le larynx, m' pour le menton et 'q' pour quitter. \n");
+  int fd = open("/dev/tty0", O_NOCTTY);
+  if (fd == -1){
+    perror("open");
+    return -1;
+  }
+
+
+  printf("Les flèches pour bouger les lèvres (s pour passer de haut à bas), 'a'/'z' pour les comissures des lèvres, 'p' pour shocker la langue, 'e' pour le larynx, 'm' pour le menton et 'q' pour quitter. \n");
   char val=' ', zone=' ', *buf;
-  int pwr=0, p=0;
+  int pwr=0, p=0, state=0;
   while(1){
     val=getch();
     switch(val){
@@ -81,21 +96,39 @@ int main(int argc, char **argv)
             switch(val){
             case 'A':
                 //printf("LUP-FW!! ");
-                if(!DEBUG) MBD.servoIncr(10,MOTORHG);
+                if(state)
+                    if(!DEBUG) MBD.servoIncr(10,MOTORHG);
+                else
+                    if(!DEBUG) MBD.servoIncr(10,MOTORBG);
                 break;
             case 'B':
                 //printf("LUP-RW!! ");
-                if(!DEBUG) MBD.servoIncr(-10,MOTORHG);
+                if(state)
+                    if(!DEBUG) MBD.servoIncr(-10,MOTORHG);
+                else
+                    if(!DEBUG) MBD.servoIncr(-10,MOTORBG);
                 break;
             case 'C':
                 //printf("LDOWN-FW!! ");
-                if(!DEBUG) MBD.servoIncr(10,MOTORHD);
+                if(state)
+                    if(!DEBUG) MBD.servoIncr(10,MOTORHD);
+                else
+                    if(!DEBUG) MBD.servoIncr(10,MOTORBD);
                 break;
             case 'D':
                 //printf("LDOWN-RW!! ");
-                if(!DEBUG) MBD.servoIncr(-10,MOTORHD);
+                if(state)
+                    if(!DEBUG) MBD.servoIncr(-10,MOTORHD);
+                else
+                    if(!DEBUG) MBD.servoIncr(-10,MOTORBD);
                 break;
             }
+            break;
+        case 's':
+            if(state)
+                state=1;
+            else
+                state=0;
             break;
         case 'q':
             //xmlCleanupParser();

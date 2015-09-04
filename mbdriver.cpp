@@ -285,7 +285,7 @@ void MBDriver::mvtx(float rec_pos, int sec)
     }
 }
 
-void MBDriver::servoIncr(int num, int pas)
+void MBDriver::servoIncr(int pas, int num)
 {
     int pos = maestroGetPosition(num)+pas;
     if(pos>servo[num].pos_max)
