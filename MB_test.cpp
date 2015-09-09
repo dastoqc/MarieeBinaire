@@ -20,7 +20,9 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <linux/kd.h>
-
+#include <sstream>
+#include <iostream>
+#include <fstream>
 
 /*#include <libxml/xmlreader.h>
 #include <libxml/parser.h>
@@ -77,12 +79,8 @@ int main(int argc, char **argv)
           return -1;
       }
   }
-
-  int fd = open("/dev/tty0", O_NOCTTY);
-  if (fd == -1){
-    perror("open");
-    return -1;
-  }
+  else
+      std::cout << "Not opening devices in DEBUG mode." << std::endl;
 
 
   printf("Les flèches pour bouger les lèvres (s pour passer de haut à bas), 'a'/'z' pour les comissures des lèvres, 'p' pour shocker la langue, 'e' pour le larynx, 'm' pour le menton et 'q' pour quitter. \n");
@@ -91,57 +89,56 @@ int main(int argc, char **argv)
   while(1){
     val=getch();
     switch(val){
-        case '\033': //Flèches.
-            getch();val=getch();
-            switch(val){
-            case 'A':
+        //case '\033': //Flèches.
+        //    getch();val=getch();
+        //    switch(val){
+            case 'u':
                 //printf("LUP-FW!! ");
                 if(state)
-                    if(!DEBUG) MBD.servoIncr(10,MOTORHG);
+                    MBD.servoIncr(10,MOTORHG);
                 else
-                    if(!DEBUG) MBD.servoIncr(10,MOTORBG);
+                    MBD.servoIncr(10,MOTORBG);
                 break;
-            case 'B':
+            case 'n':
                 //printf("LUP-RW!! ");
                 if(state)
-                    if(!DEBUG) MBD.servoIncr(-10,MOTORHG);
+                    MBD.servoIncr(-10,MOTORHG);
                 else
-                    if(!DEBUG) MBD.servoIncr(-10,MOTORBG);
+                    MBD.servoIncr(-10,MOTORBG);
                 break;
-            case 'C':
+            case 'h':
                 //printf("LDOWN-FW!! ");
                 if(state)
-                    if(!DEBUG) MBD.servoIncr(10,MOTORHD);
+                    MBD.servoIncr(10,MOTORHD);
                 else
-                    if(!DEBUG) MBD.servoIncr(10,MOTORBD);
+                    MBD.servoIncr(10,MOTORBD);
                 break;
-            case 'D':
+            case 'j':
                 //printf("LDOWN-RW!! ");
                 if(state)
-                    if(!DEBUG) MBD.servoIncr(-10,MOTORHD);
+                    MBD.servoIncr(-10,MOTORHD);
                 else
-                    if(!DEBUG) MBD.servoIncr(-10,MOTORBD);
+                    MBD.servoIncr(-10,MOTORBD);
                 break;
-            }
-            break;
+        //    }
+        //    break;
         case 's':
             if(state)
-                state=1;
-            else
                 state=0;
+            else
+                state=1;
             break;
         case 'q':
             //xmlCleanupParser();
             return 0;
         case 'a':
-            //printf("LCOIN-FW!! ");
-                    if(!DEBUG) MBD.servoIncr(10,MOTORCOIN);
+            MBD.servoIncr(10,MOTORCOIN);
             break;
         case 'z':
-            //printf("LCOIN-RW!! ");
-                    if(!DEBUG) MBD.servoIncr(-10,MOTORCOIN);
+            MBD.servoIncr(-10,MOTORCOIN);
             break;
-            case 'p':
+
+        case 'p':
             printf("SHOCK, entrer la zone (a,b,c) et la puissance (0-100) :");
             if (scanf("%c%d", &zone, &pwr) == 2)
                     printf ("%c à %d\% \n", zone, pwr);
@@ -152,21 +149,23 @@ int main(int argc, char **argv)
                 MBD.shock(20);
             }
             break;
+
         case 'e':
             printf("ELECTROLARYNX, entrer la puissance (0-100) :");
             if (scanf("%d", &pwr) == 1)
                     printf ("%d\% \n", pwr);
             else
                 printf("Mauvaise entrée");
-                if(!DEBUG) MBD.setLarynx(pwr);
+            MBD.setLarynx(pwr);
             break;
+
         case 'm':
             printf("MENTON, entrer la position (-100->100) :");
             if (scanf("%d", &pwr) == 1)
                     printf ("%d\% \n", pwr);
             else
                 printf("Mauvaise entrée");
-            if(!DEBUG) MBD.chinGoTo(pwr);
+            MBD.chinGoTo(pwr);
             break;
         default:  //renvoi la commande non interprétée
             printf("%c ",val);

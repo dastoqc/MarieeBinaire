@@ -1,6 +1,6 @@
 #include "mbdriver.h"
 
-#include "arduino-serial/arduino-serial-lib.h"
+#include "arduino-serial-lib.h"
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -287,66 +287,82 @@ void MBDriver::mvtx(float rec_pos, int sec)
 
 void MBDriver::servoIncr(int pas, int num)
 {
-    int pos = maestroGetPosition(num)+pas;
-    if(pos>servo[num].pos_max)
-        pos=servo[num].pos_max;
-    else if (pos<servo[num].pos_min)
-            pos=servo[num].pos_min;
-    maestroSetTarget(num, pos);
-    cout << "Position S" << num << ": " << pos << endl;
+    if(!DEBUG){
+        int pos = maestroGetPosition(num)+pas;
+        if(pos>servo[num].pos_max)
+            pos=servo[num].pos_max;
+        else if (pos<servo[num].pos_min)
+                pos=servo[num].pos_min;
+        maestroSetTarget(num, pos);
+        cout << "Position S" << num << ": " << pos << endl;
+    }else
+        cout << "Incr" << num << ": " << pas <<endl;
 }
 
 void MBDriver::servoGoTo(int num, int pos)
 {
-    if(pos>servo[num].pos_max)
-        pos=servo[num].pos_max;
-    else if (pos<servo[num].pos_min)
-            pos=servo[num].pos_min;
-    maestroSetTarget(num, pos);
+    if(!DEBUG){
+        if(pos>servo[num].pos_max)
+            pos=servo[num].pos_max;
+        else if (pos<servo[num].pos_min)
+                pos=servo[num].pos_min;
+        maestroSetTarget(num, pos);
+    }else
+        cout << "Move servo " << num << ": " << pos << endl;
 }
 
 void MBDriver::chinGoTo(float rec_pos, int speed)
 {
-    char* buf;
+    char buf[6];
     rec_pos--;
     int pos = floor((float)rec_pos*(float)chinStepper.max/(float)(chinStepper.nb_pos-1));
     if(abs(pos)>chinStepper.max)
         pos=sgn(pos)*chinStepper.max;
 
     sprintf(buf, "v%03d", speed);
-    int rc = writeArduino(buf);
-    usleep(100*1000);
-    readArduino();
+    if(!DEBUG){
+        int rc = writeArduino(buf);
+        usleep(100*1000);
+        readArduino();
+    }else
+        cout << "Chin speed: " << buf << endl;
+
 
     pos=pos-chinStepper.current;
-    if(pos>0)
+    if(pos>=0)
         sprintf(buf, "m%03d",pos);
     else
         sprintf(buf, "n%03d",-pos);
 
-    //serialport_flush(fdArduino);
-    rc = writeArduino(buf);
-    usleep(100*1000);
-    readArduino();
+    if(!DEBUG){
+        //serialport_flush(fdArduino);
+        rc = writeArduino(buf);
+        usleep(100*1000);
+        readArduino();
+    }else
+        cout << "Chin pos: " << buf << endl;
     chinStepper.current+=pos;
 }
 
 void MBDriver::setLarynx(int pwr)
 {
-    char* buf;
+    char buf[6];
     if(pwr>elarynx.max)
         pwr=elarynx.max;
 
     //serialport_flush(fdArduino);
     sprintf(buf, "l%03d",pwr);
-    int rc = writeArduino(buf);
-    usleep(20*1000);
-    readArduino();
+    if(!DEBUG){
+        int rc = writeArduino(buf);
+        usleep(20*1000);
+        readArduino();
+    }else
+        cout << "eLarynx: " << buf << endl;
 }
 
 void MBDriver::setLangue(char zone, int pwr)
 {
-    char* buf;
+    char buf[6];
     sprintf(buf, "%c%03d",zone,pwr);
     int rc = writeArduino(buf);
     usleep(20*1000);
@@ -356,7 +372,7 @@ void MBDriver::setLangue(char zone, int pwr)
 
 void MBDriver::shock(int t)
 {
-    char* buf;
+    char buf[6];
     sprintf(buf, "%g%03d",t);
     int rc = writeArduino(buf);
     usleep((500+t)*1000);
